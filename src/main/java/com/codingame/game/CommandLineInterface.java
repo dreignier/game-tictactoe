@@ -69,8 +69,6 @@ public class CommandLineInterface {
         for (int i = 0; i < playerCount; ++i) {
           System.out.println(result.scores.get(i));
         }
-        
-        System.out.println(String.join("\n", result.uinput));
       }
     } catch (Exception e) {
       System.err.println(e);
