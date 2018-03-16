@@ -24,7 +24,8 @@ public class CommandLineInterface {
              .addOption("p3", true, "Player 3 command line.")
              .addOption("p4", true, "Player 4 command line.")
              .addOption("s", false, "Server mode")
-             .addOption("l", true, "File output for logs");
+             .addOption("l", true, "File output for logs")
+             .addOption("d", false, "Referee initial data");
       
       CommandLine cmd = new DefaultParser().parse(options, args);
       
@@ -34,6 +35,14 @@ public class CommandLineInterface {
       }
       
       GameRunner runner = new GameRunner();
+      
+      Field field = GameRunner.class.getDeclaredField("gameResult");
+      field.setAccessible(true);
+      GameResult result = (GameResult) field.get(runner);
+      
+      if (cmd.hasOption("d")) { 
+    	  result.refereeInput = cmd.getOptionValue("d");
+      }
   
       int playerCount = 0;
       
@@ -49,7 +58,7 @@ public class CommandLineInterface {
       } else {
         Method initialize = GameRunner.class.getDeclaredMethod("initialize", Properties.class);
         initialize.setAccessible(true);
-        initialize.invoke(runner, new Properties());
+		initialize.invoke(runner, new Properties());
     
         Method run = GameRunner.class.getDeclaredMethod("run");
         run.setAccessible(true);
@@ -62,12 +71,12 @@ public class CommandLineInterface {
           Files.asCharSink(Paths.get(cmd.getOptionValue("l")).toFile(), Charset.defaultCharset()).write((String) getJSONResult.invoke(runner));
         }
         
-        Field field = GameRunner.class.getDeclaredField("gameResult");
-        field.setAccessible(true);
-        GameResult result = (GameResult) field.get(runner);
-        
         for (int i = 0; i < playerCount; ++i) {
           System.out.println(result.scores.get(i));
+        }
+        
+        for (String line: result.uinput) {
+        	System.out.println(line);
         }
       }
     } catch (Exception e) {
